@@ -1,0 +1,27 @@
+# SafeHarbor access policy. Everything not listed here is denied.
+
+[access]
+# Tables in the de-identified mart an agent may read. Raw PHI never enters the
+# mart; this list additionally blocks schema recon (sqlite_master etc.).
+tables = ["members", "claims", "providers"]
+
+# SQL functions an agent may call. Anything else (load_extension, randomblob,
+# group_concat, window functions, json_*, ...) is denied at compile time.
+functions = [
+  "count", "sum", "total", "avg", "min", "max",
+  "round", "abs", "coalesce", "ifnull", "nullif", "iif",
+  "lower", "upper", "length", "substr", "trim", "replace", "instr", "like", "glob",
+  "date", "strftime", "cast",
+]
+
+[privacy]
+# Aggregates computed over fewer than k rows are returned as NULL.
+# 11 follows the CMS cell-size suppression policy (no cells of 1-10).
+k_min = 11
+# Free-text columns whose contents are passed to the agent marked as untrusted.
+untrusted_text_columns = ["practice_name", "cpt_desc"]
+
+[limits]
+max_rows = 500
+max_vm_steps = 50_000_000
+timeout_s = 5.0
